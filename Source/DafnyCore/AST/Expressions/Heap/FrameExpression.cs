@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Microsoft.Dafny;
 
-public class FrameExpression : NodeWithComputedRange, IHasReferences {
+public class FrameExpression : NodeWithOrigin, IHasReferences {
   public Expression OriginalExpression { get; } // may be a WildcardExpr
   [FilledInDuringResolution] public Expression? DesugaredExpression; // may be null for modifies clauses, even after resolution
 
@@ -20,7 +20,7 @@ public class FrameExpression : NodeWithComputedRange, IHasReferences {
     Contract.Invariant(!(E is WildcardExpr) || (FieldName == null && Field == null));
   }
 
-  public readonly string? FieldName;
+  public string? FieldName;
   [FilledInDuringResolution] public Field? Field;  // null if FieldName is
 
   /// <summary>
@@ -49,6 +49,6 @@ public class FrameExpression : NodeWithComputedRange, IHasReferences {
   public override IEnumerable<INode> Children => new[] { E };
   public override IEnumerable<INode> PreResolveChildren => Children;
   public IEnumerable<Reference> GetReferences() {
-    return Field == null ? Enumerable.Empty<Reference>() : new[] { new Reference(Origin, Field) };
+    return Field == null ? Enumerable.Empty<Reference>() : new[] { new Reference(ReportingRange, Field) };
   }
 }

@@ -6,11 +6,11 @@ using System.Diagnostics.Contracts;
 namespace Microsoft.Dafny;
 
 public class SeqSelectExpr : Expression, ICloneable<SeqSelectExpr> {
-  public readonly bool SelectOne;  // false means select a range
-  public readonly Expression Seq;
-  public readonly Expression? E0;
-  public readonly Expression? E1;
-  public readonly Token? CloseParen;
+  public bool SelectOne;  // false means select a range
+  public Expression Seq;
+  public Expression? E0;
+  public Expression? E1;
+  public Token? CloseParen;
 
   public SeqSelectExpr(Cloner cloner, SeqSelectExpr original) : base(cloner, original) {
     SelectOne = original.SelectOne;
@@ -38,9 +38,6 @@ public class SeqSelectExpr : Expression, ICloneable<SeqSelectExpr> {
     E0 = e0;
     E1 = e1;
     CloseParen = closeParen;
-    if (closeParen != null) {
-      FormatTokens = [closeParen];
-    }
   }
 
   public override IEnumerable<Expression> SubExpressions {
