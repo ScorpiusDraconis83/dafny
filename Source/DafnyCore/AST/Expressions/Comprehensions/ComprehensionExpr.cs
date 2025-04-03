@@ -1,7 +1,6 @@
 #nullable enable
 
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Microsoft.Dafny;
@@ -24,8 +23,8 @@ namespace Microsoft.Dafny;
 /// </summary>
 public abstract partial class ComprehensionExpr : Expression, IAttributeBearingDeclaration, IBoundVarsBearingExpression, ICanFormat {
   public virtual string WhatKind => "comprehension";
-  public readonly List<BoundVar> BoundVars;
-  public readonly Expression? Range;
+  public List<BoundVar> BoundVars;
+  public Expression? Range;
   public Expression Term;
 
   public IEnumerable<BoundVar> AllBoundVars => BoundVars;
@@ -36,7 +35,6 @@ public abstract partial class ComprehensionExpr : Expression, IAttributeBearingD
   // invariant Bounds == null || Bounds.Count == BoundVars.Count;
 
   public List<BoundVar> UncompilableBoundVars() {
-    Contract.Ensures(Contract.Result<List<BoundVar>>() != null);
     var v = BoundedPool.PoolVirtues.Finite | BoundedPool.PoolVirtues.Enumerable;
     return BoundedPool.MissingBounds(BoundVars, Bounds, v);
   }
