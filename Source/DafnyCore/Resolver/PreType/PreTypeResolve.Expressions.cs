@@ -463,13 +463,16 @@ namespace Microsoft.Dafny {
               case UnaryOpExpr.Opcode.Allocated:
                 // the argument is allowed to have any type at all
                 opExpr.PreType = ConstrainResultToBoolFamily(opExpr.Origin, "allocated", "boolean literal used as if it had type {0}");
-                if ((resolutionContext.CodeContext is Function && !resolutionContext.InOld) ||
+                if ((resolutionContext.CodeContext is Function { ReadsDoubleStar: false } && !resolutionContext.InOld) ||
                     resolutionContext.CodeContext is ConstantField ||
                     CodeContextWrapper.Unwrap(resolutionContext.CodeContext) is RedirectingTypeDecl) {
                   var declKind = CodeContextWrapper.Unwrap(resolutionContext.CodeContext) is RedirectingTypeDecl redir
                     ? redir.WhatKind
                     : ((MemberDecl)resolutionContext.CodeContext).WhatKind;
-                  ReportError(opExpr, "a {0} definition is not allowed to depend on the set of allocated references", declKind);
+                  var hint = resolutionContext.CodeContext is Function { Name: var name } ?
+                    $"; perhaps declare {declKind} '{name}' with 'reads **'" :
+                    "";
+                  ReportError(opExpr, $"a {declKind} definition is not allowed to depend on the set of allocated references{hint}");
                 }
                 break;
               case UnaryOpExpr.Opcode.Assigned:
@@ -798,7 +801,7 @@ namespace Microsoft.Dafny {
             lambdaExpr.PreType = BuiltInArrowType(e.BoundVars.ConvertAll(v => v.PreType), e.Body.PreType, e.Reads.Expressions.Count != 0, e.Range != null);
             break;
           }
-        case WildcardExpr: {
+        case WildcardExpr or DoubleWildcardExpr: {
             var obj = new DPreType(BuiltInTypeDecl(PreType.TypeNameObjectQ), []);
             expr.PreType = new DPreType(BuiltInTypeDecl(PreType.TypeNameSet), [obj]);
             break;
